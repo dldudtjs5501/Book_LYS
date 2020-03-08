@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lys.mapper.CartMapper">
+
+<!-- 카트 넣기 -->
+<insert id="cartinsert">
+	insert into cart(writer,bookno,amount) 
+	values(#{writer},#{bookno},#{amount});
+</insert>
+
+<!-- 카트에 담은 물건 수 -->
+<select id="countcart" resultType="int">
+	select count(*) from cart 
+	where writer=#{writer} and bookno=#{bookno};
+</select>
+
+<!-- 카트에 담은 물건 리스트 -->
+<select id="listcart" resultType="com.lys.model.CartVO">
+	select c.cart_id as cart_id ,
+		   m.userid as userid,
+		   b.bookno as bookno,
+		   m.name as name,
+		   b.b_thumbnail as b_thumbnail,
+		   b.b_title as b_title,
+		   c.amount as amount,
+		   b.b_price as b_price,
+		   (b.b_price*c.amount) as money 
+	from cart as c, book_member as m , book_product as b
+    where m.userid = c.writer and b.bookno = c.bookno and c.writer=#{writer} 
+    order by c.cart_id;
+
+</select>
+
+<!-- 카트 전체 금액 -->
+<select id="sumMoney" resultType="int">
+	select ifnull(sum(b.b_price*c.amount),0) as money 
+	from book_product as b , cart as c 
+	where b.bookno = c.bookno and c.writer=#{writer};
+</select>
+
+<!-- 선택한 상품 삭제 -->
+<delete id="deletecart">
+	delete from cart where cart_id=#{cart_id};
+</delete>
+
+<!-- 카트 수량 수정 -->
+<update id="modifycart">
+	update cart set amount=#{amount} where bookno=#{bookno} and writer=#{writer};
+</update>
+
+<!-- 중복으로 상품 추가 할 경우 추가 한 수량적용 -->
+<update id="updatecart">
+	update cart set amount = amount + #{amount} where writer=#{writer} and bookno =#{bookno};
+</update>
+</mapper>

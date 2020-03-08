@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lys.mapper.MemberMapper">
+
+<!--회원 등록 하기-->
+<insert id="register" >
+	<![CDATA[
+	insert into book_member 
+	values(#{userid},#{password},#{name},#{address_post},#{address_road},#{address_detail},#{phone},#{email},#{address_jibun});
+	]]>
+</insert>
+
+<!-- ID 중복 체크 -->
+<select id="idcheck" resultType="int">
+	select count(*) from book_member where userid=#{userid};
+</select>
+
+<!-- 로그인 체크 -->
+<select id="loginchk"  resultType="com.lys.model.MemberVO">
+	select * from book_member where userid=#{userid} and password=#{password};
+</select>
+
+<!-- 회원 정보 Detail-->
+<select id="accdetail" resultType="com.lys.model.MemberVO">
+	select * from book_member where userid=#{userid};
+</select>
+
+<!-- 회원 정보 수정 -->
+<update id="accmodify">
+	update book_member 
+		set
+			password=#{password},
+		    name=#{name},
+		    address_post=#{address_post},
+		    address_road=#{address_road},
+		    address_detail=#{address_detail},
+		    phone=#{phone},
+		    email=#{email},
+		    address_jibun=#{address_jibun}
+		where userid=#{userid};
+</update>
+
+<!-- id 찾기 -->
+<select id="findid" resultType="com.lys.model.MemberVO">
+	select * from book_member where name=#{name} and phone=#{phone};
+</select>
+
+<!-- password 변경 / 1,아이디와 이메일이 존재 하는 회원 정보 확인 -->
+<select id="modifypw" resultType="int">
+	select count(*) from book_member where userid=#{userid} and email=#{email};
+</select>
+
+<!-- password 찾기 / 인증 후 password 변경 -->
+<update id="pass_change">
+	update book_member set password=#{password} where email=#{email};
+</update>
+
+<!-- 회원 탈퇴 -->
+<delete id="memberdel">
+	delete from book_member where userid=#{userid} and password=#{password};
+</delete>
+</mapper>

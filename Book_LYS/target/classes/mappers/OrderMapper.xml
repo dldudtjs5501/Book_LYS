@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lys.mapper.CartMapper">
+
+<!--주문 정보 입력  -->
+<insert id="orderinfo">
+	insert into book_order 
+	values(#{orderid},#{userid},#{ordersend},#{orderrec},#{o_address_post},#{o_address_road},
+	#{o_address_detail},#{o_phone},#{place},#{pay},#{r_phone},#{o_amount});
+</insert>
+
+<!-- 카트에 담긴 상품의 주문 상세 정보 -->
+<insert id="orderinfo_dtail">
+	insert into book_order_details(orderid,bookno,amount)
+	select #{orderid},bookno,amount from cart;
+</insert>
+
+<!-- 주문 후 카트에 담긴 list 삭제 -->
+<delete id="cartalldelete">
+	delete from cart where writer=#{writer};
+</delete>
+
+<!-- 로그인 한 고객의 주문 목록 -->
+<select id="orderList" resultType="com.lys.model.Book_OrderVO">
+	select * from book_order where userid=#{userid};
+</select>
+
+<!-- 주문 번호에 따른 상세 내역 -->
+<select id="orderlistdetail" resultType="com.lys.model.OrderListDetailVO">
+	select o.userid as userid,o.orderid as orderid ,o.ordersend as ordersend,o.orderrec as orderrec ,o.o_address_post as o_address_post
+	,o.o_address_road as o_address_road,o.o_address_detail as o_address_detail,o.o_phone as o_phone,
+	o.r_phone as r_phone,o.place as place,o.pay as pay,o.o_amount as o_amount,b.b_title as b_title,b.b_price as b_price,
+	b.b_thumbnail as b_thumbnail,d.amount as amount
+	from book_order o inner join book_order_details d 
+	on o.orderid = d.orderid inner join book_product b 
+	on d.bookno = b.bookno 
+	where o.userid=#{userid} and o.orderid=#{orderid};
+</select>
+</mapper>

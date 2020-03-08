@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lys.mapper.BookMapper">
+<insert id="bookwrite">
+	<![CDATA[
+	insert into Book_product(b_title,b_price,b_contents,b_img,b_regdate,b_thumbnail) 
+	values(#{b_title},#{b_price},#{b_contents},#{b_img},sysdate(),#{b_thumbnail});
+	]]>
+</insert>
+
+<!-- 상품 리스트 -->
+<select id="booklist" resultType="com.lys.model.BookVO">
+	<![CDATA[
+		select * from Book_product
+	]]>
+</select>
+
+<!-- 페이징 처리에 의한 상품 리스트 -->
+<select id="booklistpaging" resultType="com.lys.model.BookVO">
+
+select bookno,b_title,b_price,b_contents,b_img,b_regdate,b_thumbnail
+	from(
+	select @rownum:=@rownum+1 as rownum,bookno,b_title,b_price,b_contents,b_img,b_regdate,b_thumbnail
+	from (select @rownum:=0) as rownum 
+	, Book_product
+	<if test="keyword !=null">
+	where b_title like concat('%',#{keyword},'%')
+	</if>
+	order by bookno desc
+	)Book_product 
+	<![CDATA[
+	where rownum > (#{b_pageNum}-1)*#{b_amount} and rownum <=#{b_pageNum}*#{b_amount};
+	]]>
+</select>
+
+<!-- 페이징 처리에 의한 게시글 전체 갯수 -->
+<select id="bookcount" resultType="int">
+	<![CDATA[
+	select count(*) from Book_product;
+	]]>
+</select>
+
+<!-- 상품 상세 보기 -->
+<select id="bookdetail" resultType="com.lys.model.BookVO">
+	<![CDATA[
+	select * from book_product where bookno=#{bookno};
+	]]>
+</select>
+
+<!-- 상품 수정 하기 -->
+<update id="bookmodify">
+	update book_product 
+	set
+	b_title=#{b_title},
+    b_price=#{b_price},
+    b_contents=#{b_contents},
+    b_img=#{b_img},
+    b_regdate=sysdate(),
+    b_thumbnail=#{b_thumbnail}
+where bookno=#{bookno};
+</update>
+
+<!-- 선택 한 상품 이미지 경로 확인 -->
+<select id="bookimgurl" resultType="String">
+	<![CDATA[
+	select b_img , b_thumbnail from book_product where bookno =#{bookno};
+	]]>
+</select>
+
+<!-- 선택 한 상품 삭제 하기 -->
+<delete id="bookdel">
+delete from book_product where bookno=#{bookno};
+</delete>
+</mapper>
